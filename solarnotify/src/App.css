@@ -10,9 +10,16 @@
   padding: 1.5em;
   will-change: filter;
   transition: filter 300ms;
+	animation: alternate-shadow 5s infinite;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #FF0000);
+
+@keyframes alternate-shadow {
+    0%, 100% {
+  			filter: drop-shadow(0 0 2em #FF0000);
+    }
+    50% {
+  			filter: drop-shadow(0 0 2em #388E3C);
+    }
 }
 
 @keyframes logo-spin {

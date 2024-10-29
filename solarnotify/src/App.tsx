@@ -6,9 +6,7 @@ function App() {
   return (
     <>
       <div>
-        <a href="https://solarnotify.com" target="_blank">
-          <img src={logo} className="logo" alt="Vite logo" />
-        </a>
+        <img src={logo} className="logo" alt="Vite logo" />
       </div>
       <h1>SolarNotify</h1>
     </>
