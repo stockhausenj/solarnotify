@@ -29,8 +29,21 @@ export async function onRequest(context) {
     }
 
     const data = await response.json();
+    const accessToken = data.access_token;
 
-    return new Response(JSON.stringify(data), {
+    const systemsResponse = await fetch(`https://api.enphaseenergy.com/api/v4/systems?key=${context.env.ENPHASE_API_KEY}`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!systemsResponse.ok) {
+      throw new Error('Error fetching systems data');
+    }
+
+    const systemsData = await systemsResponse.json();
+
+    return new Response(JSON.stringify(systemsData), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
