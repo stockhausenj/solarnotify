@@ -6,7 +6,8 @@
 }
 
 .logo {
-  height: 20em;
+  height: auto;
+  width: 100%;
   padding: 1.5em;
   will-change: filter;
   transition: filter 300ms;
@@ -22,15 +23,6 @@
     }
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo {
     animation: logo-spin infinite 20s linear;
@@ -43,4 +35,8 @@
 
 .read-the-docs {
   color: #888;
+}
+
+body {
+	place-items: normal;
 }

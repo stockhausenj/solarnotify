@@ -1,16 +1,26 @@
+import '@mantine/core/styles.css';
+import { MantineProvider, Grid, Container } from '@mantine/core';
+
 import logo from './assets/logo.png'
 import './App.css'
+import { Setup } from './components/Setup/Setup'
 
-function App() {
+export default function App() {
 
   return (
-    <>
-      <div>
-        <img src={logo} className="logo" alt="Vite logo" />
-      </div>
-      <h1>SolarNotify</h1>
-    </>
+    <MantineProvider
+      defaultColorScheme='dark'
+    >
+      <Container my="md">
+        <Grid>
+          <Grid.Col span={{ base: 12, xs: 5 }}>
+            <img src={logo} className="logo" />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, xs: 7 }}>
+            <Setup />
+          </Grid.Col>
+        </Grid>
+      </Container>
+    </ MantineProvider>
   )
 }
-
-export default App
