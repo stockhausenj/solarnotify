@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Space, Flex, Card, Text, Button, Select, TextInput, Loader } from '@mantine/core';
+import { Title, Checkbox, Stack, Space, Flex, Card, Text, Button, Select, TextInput, Loader } from '@mantine/core';
 import classes from './Setup.module.css';
 
 export function Setup() {
   const [systemsDataLoading, setSystemsDataLoading] = useState(false);
   const [systemsData, setSystemsData] = useState<any>(null)
   const [selectedSolarDataSource, setSelectedSolarDataSource] = useState<string | null>(null);
-  const [selectedEmailAddress, setSelectedEmailAddress] = useState('')
+  const [selectedEmail, setSelectedEmail] = useState('')
   const [solarDataVerified, setSolarDataVerified] = useState(false);
 
   const enphaseClientId = 'eef7fb7a4aa9834d2988819df395a83c';
@@ -99,8 +99,9 @@ export function Setup() {
 
   return (
     <>
-      <h2>Setup</h2>
-      <h3>Solar System Check</h3>
+      <Title order={3}>Setup</Title>
+      <Space h="lg" />
+      <Title order={4}>Solar System Check</Title>
       <Select
         mt="md"
         classNames={classes}
@@ -131,30 +132,58 @@ export function Setup() {
         </Card>
       )}
 
-      <h3>Email Check</h3>
+      <Space h="lg" />
+      <Title order={4}>Email Check</Title>
+      <Space h="md" />
       <TextInput
-        value={selectedEmailAddress}
-        onChange={(event) => setSelectedEmailAddress(event.currentTarget.value)}
+        value={selectedEmail}
+        onChange={(event) => setSelectedEmail(event.currentTarget.value)}
         label="email address"
         placeholder="bob@gmail.com"
         classNames={classes}
       />
       <div style={{ marginTop: '20px' }}>
         <Flex gap="md">
-          <Button disabled={!solarDataVerified || !selectedEmailAddress} onClick={sendEmailVerification} color="green">
+          <Button disabled={!solarDataVerified || !selectedEmail} onClick={sendEmailVerification} color="green">
             send email verification
           </Button>
-          <Button disabled={!solarDataVerified || !selectedEmailAddress} onClick={checkEmailVerification} color="green">
+          <Button disabled={!solarDataVerified || !selectedEmail} onClick={checkEmailVerification} color="green">
             check email verification
           </Button>
         </Flex>
       </div>
 
+      <Space h="lg" />
+      <Space h="lg" />
+      <Title order={4}>Notification Rules</Title>
+      <Text c="dimmed" size="sm">Rules are evaluated hourly for each system.</Text>
+      <Text c="dimmed" size="sm">Production alerts occur if last production is older than 24h.</Text>
+      <Space h="md" />
+      <Stack>
+        <Checkbox
+          defaultChecked
+          //color="lime.4"
+          color="green.6"
+          iconColor="dark.8"
+          size="md"
+          label="system status"
+        />
+        <Checkbox
+          defaultChecked
+          color="green.6"
+          iconColor="dark.8"
+          size="md"
+          label="system last production"
+        />
+      </Stack>
+
+      <Space h="md" />
       <div style={{ marginTop: '20px' }}>
         <Button disabled={true} onClick={authSolarData} color="green">
           submit
         </Button>
       </div>
+
     </>
   );
 }
