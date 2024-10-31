@@ -3,21 +3,78 @@ import { Space, Flex, Card, Text, Button, Select, TextInput, Loader } from '@man
 import classes from './Setup.module.css';
 
 export function Setup() {
-  const [loading, setLoading] = useState(false);
+  const [systemsDataLoading, setSystemsDataLoading] = useState(false);
   const [systemsData, setSystemsData] = useState<any>(null)
   const [selectedSolarDataSource, setSelectedSolarDataSource] = useState<string | null>(null);
+  const [selectedEmailAddress, setSelectedEmailAddress] = useState('')
+  const [solarDataVerified, setSolarDataVerified] = useState(false);
+
+  const enphaseClientId = 'eef7fb7a4aa9834d2988819df395a83c';
 
   const currentHostname = window.location.hostname;
   const currentPort = window.location.port;
   const redirectUri = `${window.location.protocol}//${currentHostname}${currentPort ? `:${currentPort}` : ''}`;
-  const clientId = 'eef7fb7a4aa9834d2988819df395a83c';
 
-  const handleInitiateSetup = () => {
-    const authEndpoint = 'https://api.enphaseenergy.com/oauth/authorize';
-    const authUrl = `${authEndpoint}?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
-    localStorage.setItem("selectedSolarDataSource", selectedSolarDataSource);
-    window.location.href = authUrl;
+  const validateSolarData = () => {
+    switch (selectedSolarDataSource) {
+      case "Enphase":
+        console.log("validating enphase data")
+        console.log('Setup successful:', systemsData);
+        setSolarDataVerified(true);
+    }
+  }
+
+  const getSolarData = () => {
+    switch (selectedSolarDataSource) {
+      case "Enphase":
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+        const clientId = enphaseClientId;
+        if (code) {
+          setSystemsDataLoading(true);
+
+          fetch('/api/setup', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ code, redirectUri, clientId }),
+          })
+            .then(response => response.json())
+            .then(data => {
+              //console.log('Setup successful:', data);
+              setSystemsData(data);
+              setSystemsDataLoading(false);
+              window.history.replaceState({}, document.title, window.location.pathname);
+            })
+            .catch(error => {
+              console.error('Error during setup:', error);
+              setSystemsDataLoading(false);
+            });
+        }
+    }
+  }
+
+  const authSolarData = () => {
+    switch (selectedSolarDataSource) {
+      case "Enphase":
+        const clientId = enphaseClientId;
+        const authEndpoint = 'https://api.enphaseenergy.com/oauth/authorize';
+        const authUrl = `${authEndpoint}?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+        window.location.href = authUrl;
+    }
+    if (selectedSolarDataSource) {
+      localStorage.setItem("selectedSolarDataSource", selectedSolarDataSource);
+    }
   };
+
+  const sendEmailVerification = () => {
+    console.log("do nothing")
+  }
+
+  const checkEmailVerification = () => {
+    console.log("do nothing")
+  }
 
   useEffect(() => {
     const savedSolarDataSource = localStorage.getItem("selectedSolarDataSource");
@@ -25,31 +82,20 @@ export function Setup() {
       setSelectedSolarDataSource(savedSolarDataSource);
       localStorage.removeItem("selectedSolarDataSource")
     }
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
-    if (code) {
-      setLoading(true);
-
-      fetch('/api/setup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ code, redirectUri, clientId }),
-      })
-        .then(response => response.json())
-        .then(data => {
-          console.log('Setup successful:', data);
-          setSystemsData(data);
-          setLoading(false);
-          window.history.replaceState({}, document.title, window.location.pathname);
-        })
-        .catch(error => {
-          console.error('Error during setup:', error);
-          setLoading(false);
-        });
-    }
   }, []);
+
+  useEffect(() => {
+    if (selectedSolarDataSource) {
+      getSolarData();
+    }
+  }, [selectedSolarDataSource]);
+
+  useEffect(() => {
+    if (systemsData !== null) {
+      validateSolarData();
+    }
+  }, [systemsData]);
+
 
   return (
     <>
@@ -62,14 +108,15 @@ export function Setup() {
         data={['Enphase']}
         placeholder="pick one"
         label="data source"
+        value={selectedSolarDataSource}
         onChange={setSelectedSolarDataSource}
       />
       <div style={{ marginTop: '20px' }}>
-        <Button disabled={!selectedSolarDataSource} onClick={handleInitiateSetup} color="green">
+        <Button disabled={!selectedSolarDataSource} onClick={authSolarData} color="green">
           verify solar data
         </Button>
       </div>
-      {loading && (
+      {systemsDataLoading && (
         <div style={{ marginTop: '20px', textAlign: 'center' }}>
           <Loader color="green" />
           <p>Loading, please wait...</p>
@@ -85,23 +132,29 @@ export function Setup() {
       )}
 
       <h3>Email Check</h3>
-      <TextInput label="email address" placeholder="bob@gmail.com" classNames={classes} />
+      <TextInput
+        value={selectedEmailAddress}
+        onChange={(event) => setSelectedEmailAddress(event.currentTarget.value)}
+        label="email address"
+        placeholder="bob@gmail.com"
+        classNames={classes}
+      />
       <div style={{ marginTop: '20px' }}>
         <Flex gap="md">
-          <Button onClick={handleInitiateSetup} color="green">
+          <Button disabled={!solarDataVerified || !selectedEmailAddress} onClick={sendEmailVerification} color="green">
             send email verification
           </Button>
-          <Button onClick={handleInitiateSetup} color="green">
+          <Button disabled={!solarDataVerified || !selectedEmailAddress} onClick={checkEmailVerification} color="green">
             check email verification
           </Button>
         </Flex>
       </div>
-      {loading && (
-        <div style={{ marginTop: '20px', textAlign: 'center' }}>
-          <Loader color="green" />
-          <p>Loading, please wait...</p>
-        </div>
-      )}
+
+      <div style={{ marginTop: '20px' }}>
+        <Button disabled={true} onClick={authSolarData} color="green">
+          submit
+        </Button>
+      </div>
     </>
   );
 }
