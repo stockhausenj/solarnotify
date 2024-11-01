@@ -4,6 +4,7 @@ import { MantineProvider, Grid, Container, Tabs } from '@mantine/core';
 import logo from './assets/logo.png';
 import './App.css';
 import { Setup } from './components/Setup/Setup';
+import { Disable } from './components/Disable/Disable';
 import { Welcome } from './components/Welcome/Welcome';
 import { Header } from './components/Header/Header';
 
@@ -38,7 +39,7 @@ export default function App() {
                 <Setup />
               </Tabs.Panel>
               <Tabs.Panel value="Disable">
-                Disable
+                <Disable />
               </Tabs.Panel>
             </Tabs>
           </Grid.Col>
