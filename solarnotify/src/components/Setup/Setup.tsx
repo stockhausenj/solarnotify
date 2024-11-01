@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Title, Checkbox, Stack, Space, Flex, Card, Text, Button, Select, TextInput, Loader } from '@mantine/core';
+import { Notification, Title, Checkbox, Stack, Space, Flex, Card, Text, Button, Select, TextInput, Loader } from '@mantine/core';
+import { IconCheck } from '@tabler/icons-react';
 import classes from './Setup.module.css';
 
 export function Setup() {
+  const [emailNotificationVisible, setEmailNotificationVisible] = useState(false);
   const [systemsDataLoading, setSystemsDataLoading] = useState(false);
   const [systemsData, setSystemsData] = useState<any>(null)
   const [selectedSolarDataSource, setSelectedSolarDataSource] = useState<string | null>(null);
@@ -15,6 +17,7 @@ export function Setup() {
   const currentHostname = window.location.hostname;
   const currentPort = window.location.port;
   const redirectUri = `${window.location.protocol}//${currentHostname}${currentPort ? `:${currentPort}` : ''}`;
+
 
   const validateSolarData = () => {
     switch (selectedSolarDataSource) {
@@ -43,7 +46,6 @@ export function Setup() {
           })
             .then(response => response.json())
             .then(data => {
-              //console.log('Setup successful:', data);
               setSystemsData(data);
               setSystemsDataLoading(false);
               window.history.replaceState({}, document.title, window.location.pathname);
@@ -104,7 +106,7 @@ export function Setup() {
         if (data.verified) {
           setEmailVerified(true);
         } else {
-          console.log("email not verified");
+          setEmailNotificationVisible(true);
         }
       })
       .catch(error => {
@@ -137,7 +139,10 @@ export function Setup() {
     <>
       <Title order={3}>Setup</Title>
       <Space h="lg" />
-      <Title order={4}>Solar System Check</Title>
+      <Title order={4}>
+        (1.) Solar Data
+        {solarDataVerified && <IconCheck style={{ color: 'green', marginRight: '5px' }} />}
+      </Title>
       <Select
         mt="md"
         classNames={classes}
@@ -161,6 +166,9 @@ export function Setup() {
       )}
       <Space h="md" />
       {systemsData && (
+        <Text c="dimmed" size="sm">Systems to monitor...</Text>
+      )}
+      {systemsData && (
         <Card withBorder shadow="sm" radius="md" padding="lg">
           <Text component="pre" style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
             {JSON.stringify(systemsData, null, 2)}
@@ -169,11 +177,26 @@ export function Setup() {
       )}
 
       <Space h="lg" />
-      <Title order={4}>Email Check</Title>
+      <Title order={4}>
+        (2.) Email
+        {emailVerified && <IconCheck style={{ color: 'green', marginRight: '5px' }} />}
+      </Title>
+      {emailNotificationVisible && (
+        <Space h="lg" />
+      )}
+      {emailNotificationVisible && (
+        <Notification color="red" onClose={() => setEmailNotificationVisible(false)}>
+          Email verification failed. Please check your spam folder. Feel free to send another verification email.
+        </Notification>
+      )}
+
       <Space h="md" />
       <TextInput
         value={selectedEmail}
-        onChange={(event) => setSelectedEmail(event.currentTarget.value)}
+        onChange={(event) => {
+          setSelectedEmail(event.currentTarget.value)
+          setEmailVerified(false);
+        }}
         label="email address"
         placeholder="bob@gmail.com"
         classNames={classes}
@@ -191,7 +214,7 @@ export function Setup() {
 
       <Space h="lg" />
       <Space h="lg" />
-      <Title order={4}>Notification Rules</Title>
+      <Title order={4}>(3.) Notification Rules</Title>
       <Text c="dimmed" size="sm">Rules are evaluated hourly for each system.</Text>
       <Text c="dimmed" size="sm">Production alerts occur if last production is older than 24h.</Text>
       <Space h="md" />
@@ -219,7 +242,6 @@ export function Setup() {
           submit
         </Button>
       </div>
-
     </>
   );
 }
