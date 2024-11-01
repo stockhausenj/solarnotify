@@ -100,6 +100,7 @@ export function Setup() {
       })
       .then(data => {
         console.log("email verificaiton data", data);
+        setEmailVerified(true);
       })
       .catch(error => {
         console.error("error during email verification", error);
