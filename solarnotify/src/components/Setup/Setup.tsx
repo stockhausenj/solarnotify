@@ -6,6 +6,7 @@ import classes from './Setup.module.css';
 
 export function Setup() {
   const [emailSentNotificationVisible, setEmailSentNotificationVisible] = useState(false);
+  const [emailSentErrorNotificationVisible, setEmailSentErrorNotificationVisible] = useState(false);
   const [emailNotificationVisible, setEmailNotificationVisible] = useState(false);
   const [systemsData, setSystemsData] = useState<any>(null)
   const [systemsDataLoading, setSystemsDataLoading] = useState(false);
@@ -106,6 +107,7 @@ export function Setup() {
       })
       .catch(error => {
         console.error('email send fail:', error);
+        setEmailSentErrorNotificationVisible(true);
       });
   }
 
@@ -229,6 +231,11 @@ export function Setup() {
       {emailSentNotificationVisible && (
         <Notification color="green" onClose={() => setEmailSentNotificationVisible(false)}>
           Verification email sent successfully! Check your spam folder.
+        </Notification>
+      )}
+      {emailSentErrorNotificationVisible && (
+        <Notification color="red" onClose={() => setEmailSentErrorNotificationVisible(false)}>
+          Failed to send verification email. Please retry.
         </Notification>
       )}
 
