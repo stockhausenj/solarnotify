@@ -13,7 +13,7 @@ export function Header() {
 
           <Group>
             <Anchor href={'https://github.com/stockhausenj/solarnotify'} target="_blank" rel="noopener noreferrer" c="dark">
-              <IconBrandGithub size={44} />
+              <IconBrandGithub size={40} />
             </Anchor>
           </Group>
         </Container>

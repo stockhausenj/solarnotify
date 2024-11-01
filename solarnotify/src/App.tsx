@@ -3,10 +3,11 @@ import { MantineProvider, Grid, Container, Tabs } from '@mantine/core';
 
 import logo from './assets/logo.png';
 import './App.css';
+import { Header } from './components/Header/Header';
+import { Welcome } from './components/Welcome/Welcome';
 import { Setup } from './components/Setup/Setup';
 import { Disable } from './components/Disable/Disable';
-import { Welcome } from './components/Welcome/Welcome';
-import { Header } from './components/Header/Header';
+import { Footer } from './components/Footer/Footer';
 
 export default function App() {
 
@@ -45,6 +46,7 @@ export default function App() {
           </Grid.Col>
         </Grid>
       </Container>
+      <Footer />
     </ MantineProvider>
   )
 }

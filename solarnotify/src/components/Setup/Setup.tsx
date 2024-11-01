@@ -21,7 +21,6 @@ export function Setup() {
 
   const notificationBoxes = notificationOptions.map((value, index) => (
     <Checkbox
-      mt="xs"
       color="green.6"
       iconColor="dark.8"
       label={value.label}
