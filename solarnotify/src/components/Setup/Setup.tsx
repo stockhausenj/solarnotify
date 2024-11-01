@@ -96,11 +96,12 @@ export function Setup() {
       .then(response => {
         if (!response.ok) {
           console.log("network error during email verification");
+        } else {
+          setEmailVerified(true);
         }
       })
       .then(data => {
         console.log("email verificaiton data", data);
-        setEmailVerified(true);
       })
       .catch(error => {
         console.error("error during email verification", error);
