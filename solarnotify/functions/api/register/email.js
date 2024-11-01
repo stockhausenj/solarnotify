@@ -10,7 +10,7 @@ export async function onRequest(context) {
   const upsertQuery = `
     INSERT INTO users (email, email_verification_code) 
     VALUES (?, ?) 
-    ON CONFLICT(email) DO UPDATE SET code = ?`;
+    ON CONFLICT(email) DO UPDATE SET email_verification_code = ?`;
 
   const result = await D1_DATABASE.prepare(upsertQuery)
     .bind(email, verificationCode, verificationCode)
