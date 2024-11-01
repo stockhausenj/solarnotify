@@ -4,13 +4,19 @@ import { IconCheck } from '@tabler/icons-react';
 import classes from './Setup.module.css';
 
 export function Setup() {
+  const [emailSentNotificationVisible, setEmailSentNotificationVisible] = useState(false);
   const [emailNotificationVisible, setEmailNotificationVisible] = useState(false);
-  const [systemsDataLoading, setSystemsDataLoading] = useState(false);
   const [systemsData, setSystemsData] = useState<any>(null)
+  const [systemsDataLoading, setSystemsDataLoading] = useState(false);
+  const [solarDataVerified, setSolarDataVerified] = useState(false);
   const [selectedSolarDataSource, setSelectedSolarDataSource] = useState<string | null>(null);
   const [selectedEmail, setSelectedEmail] = useState('')
-  const [solarDataVerified, setSolarDataVerified] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
+  const [notificationOptions, setNotificationOptions] = useState([
+    { label: 'system status', checked: true },
+    { label: 'system last production', checked: true },
+  ]);
+  const [notificationOptionsVerified, setNotificationOptionsVerified] = useState(true);
 
   const enphaseClientId = 'eef7fb7a4aa9834d2988819df395a83c';
 
@@ -82,6 +88,7 @@ export function Setup() {
       .then(response => response.json())
       .then(data => {
         console.log('email send successful:', data);
+        setEmailSentNotificationVisible(true);
       })
       .catch(error => {
         console.error('email send fail:', error);
@@ -113,6 +120,23 @@ export function Setup() {
         console.error("error during email verification", error);
       })
   }
+
+  const validateNotificationOptions = () => {
+    if (notificationOptions.some((item) => item.checked)) {
+      setNotificationOptionsVerified(true);
+    } else {
+      setNotificationOptionsVerified(false);
+    }
+  };
+
+  const handleNotificationOptionChange = (index: number) => {
+    setNotificationOptions((prev) =>
+      prev.map((item, i) =>
+        i === index ? { ...item, checked: !item.checked } : item
+      )
+    );
+    validateNotificationOptions();
+  };
 
   useEffect(() => {
     const savedSolarDataSource = localStorage.getItem("selectedSolarDataSource");
@@ -180,12 +204,17 @@ export function Setup() {
         (2.) Email
         {emailVerified && <IconCheck style={{ color: 'green', marginRight: '5px' }} />}
       </Title>
-      {emailNotificationVisible && (
+      {(emailNotificationVisible || emailSentNotificationVisible) && (
         <Space h="lg" />
       )}
       {emailNotificationVisible && (
         <Notification color="red" onClose={() => setEmailNotificationVisible(false)}>
           Email in system, but not verified yet. Follow link sent in email to verify email. Check spam folder if email not found.
+        </Notification>
+      )}
+      {emailSentNotificationVisible && (
+        <Notification color="green" onClose={() => setEmailSentNotificationVisible(false)}>
+          Verification email sent successfully! Check your spam folder.
         </Notification>
       )}
 
@@ -215,32 +244,28 @@ export function Setup() {
       <Space h="lg" />
       <Title order={5}>
         (3.) Notification Rules
-        {emailVerified && <IconCheck style={{ color: 'green', marginRight: '5px' }} />}
+        {(notificationOptionsVerified && emailVerified) && <IconCheck style={{ color: 'green', marginRight: '5px' }} />}
       </Title>
       <Text c="dimmed" size="sm">Rules are evaluated hourly for each system.</Text>
       <Text c="dimmed" size="sm">Production alerts occur if last production is older than 24h.</Text>
       <Space h="md" />
       <Stack>
-        <Checkbox
-          defaultChecked
-          //color="lime.4"
-          color="green.6"
-          iconColor="dark.8"
-          size="md"
-          label="system status"
-        />
-        <Checkbox
-          defaultChecked
-          color="green.6"
-          iconColor="dark.8"
-          size="md"
-          label="system last production"
-        />
+        {notificationOptions.map((item, index) => (
+          <Checkbox
+            key={index}
+            defaultChecked
+            color="green.6"
+            iconColor="dark.8"
+            size="md"
+            label={item.label}
+            onChange={() => handleNotificationOptionChange(index)}
+          />
+        ))}
       </Stack>
 
       <Space h="md" />
       <div style={{ marginTop: '20px' }}>
-        <Button disabled={!emailVerified} onClick={authSolarData} color="green">
+        <Button disabled={!emailVerified || !notificationOptionsVerified} onClick={authSolarData} color="green">
           submit
         </Button>
       </div>

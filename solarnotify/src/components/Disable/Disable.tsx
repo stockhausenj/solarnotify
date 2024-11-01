@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Title, Space, Button, TextInput } from '@mantine/core';
-import { IconCheck } from '@tabler/icons-react';
+import { Notification, Title, Space, Button, TextInput } from '@mantine/core';
 import classes from './Disable.module.css';
 
 export function Disable() {
   const [selectedEmail, setSelectedEmail] = useState('')
-  const [disabled, setDisabled] = useState(false);
+  const [disabledNotificationVisible, setDisabledNotificationVisible] = useState(false);
 
   const cleanup = () => {
     fetch(`/api/email/disable?email=${selectedEmail}`, {
@@ -23,7 +22,7 @@ export function Disable() {
       })
       .then(data => {
         if (data.deleted) {
-          setDisabled(true);
+          setDisabledNotificationVisible(true);
         }
       })
       .catch(error => {
@@ -36,9 +35,16 @@ export function Disable() {
       <Space h="lg" />
       <Title order={5}>
         Email
-        {disabled && <IconCheck style={{ color: 'green', marginRight: '5px' }} />}
       </Title>
-
+      {disabledNotificationVisible && (
+        <Space h="md" />
+      )}
+      <Space h="md" />
+      {disabledNotificationVisible && (
+        <Notification color="green" onClose={() => setDisabledNotificationVisible(false)}>
+          Successfully removed from system.
+        </Notification>
+      )}
       <Space h="md" />
       <TextInput
         value={selectedEmail}
@@ -51,7 +57,7 @@ export function Disable() {
       />
       <div style={{ marginTop: '20px' }}>
         <Button onClick={cleanup} color="green" loaderProps={{ type: 'dots' }}>
-          remove monitoring
+          submit
         </Button>
       </div>
     </>
