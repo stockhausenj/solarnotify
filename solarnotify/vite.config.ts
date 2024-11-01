@@ -11,6 +11,10 @@ export default defineConfig({
       "/api/setup": {
         target: "http://localhost:8788",
         changeOrigin: true,
+      },
+      "/api/register/email": {
+        target: "http://localhost:8788",
+        changeOrigin: true,
       }
     }
   },

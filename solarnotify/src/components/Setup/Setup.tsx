@@ -69,7 +69,21 @@ export function Setup() {
   };
 
   const sendEmailVerification = () => {
-    console.log("do nothing")
+    console.log(selectedEmail);
+    fetch('/api/register/email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email: selectedEmail.trim() })
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log('email send successful:', data);
+      })
+      .catch(error => {
+        console.error('email send fail:', error);
+      });
   }
 
   const checkEmailVerification = () => {
