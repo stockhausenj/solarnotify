@@ -137,9 +137,8 @@ export function Setup() {
 
   return (
     <>
-      <Title order={3}>Setup</Title>
       <Space h="lg" />
-      <Title order={4}>
+      <Title order={5}>
         (1.) Solar Data
         {solarDataVerified && <IconCheck style={{ color: 'green', marginRight: '5px' }} />}
       </Title>
@@ -177,7 +176,7 @@ export function Setup() {
       )}
 
       <Space h="lg" />
-      <Title order={4}>
+      <Title order={5}>
         (2.) Email
         {emailVerified && <IconCheck style={{ color: 'green', marginRight: '5px' }} />}
       </Title>
@@ -186,7 +185,7 @@ export function Setup() {
       )}
       {emailNotificationVisible && (
         <Notification color="red" onClose={() => setEmailNotificationVisible(false)}>
-          Email verification failed. Please check your spam folder. Feel free to send another verification email.
+          Email in system, but not verified yet. Follow link sent in email to verify email. Check spam folder if email not found.
         </Notification>
       )}
 
@@ -214,7 +213,10 @@ export function Setup() {
 
       <Space h="lg" />
       <Space h="lg" />
-      <Title order={4}>(3.) Notification Rules</Title>
+      <Title order={5}>
+        (3.) Notification Rules
+        {emailVerified && <IconCheck style={{ color: 'green', marginRight: '5px' }} />}
+      </Title>
       <Text c="dimmed" size="sm">Rules are evaluated hourly for each system.</Text>
       <Text c="dimmed" size="sm">Production alerts occur if last production is older than 24h.</Text>
       <Space h="md" />
