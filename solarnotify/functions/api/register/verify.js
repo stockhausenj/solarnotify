@@ -9,8 +9,8 @@ export async function onRequest(context) {
   const D1_DATABASE = context.env.D1_SOLARNOTIFY;
 
   const selectQuery = `
-    SELECT email FROM verifications 
-    WHERE code = ? AND email_verified = 0`;
+    SELECT email FROM users 
+    WHERE email_verification_code = ? AND email_verified = 0`;
 
   const result = await D1_DATABASE.prepare(selectQuery)
     .bind(code)
