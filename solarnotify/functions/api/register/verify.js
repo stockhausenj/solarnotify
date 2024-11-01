@@ -23,7 +23,7 @@ export async function onRequest(context) {
   const email = result.email;
 
   const updateQuery = `
-    UPDATE verifications 
+    UPDATE users 
     SET email_verified = 1 
     WHERE email = ?`;
 
