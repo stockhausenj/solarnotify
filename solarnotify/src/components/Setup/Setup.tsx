@@ -8,6 +8,7 @@ export function Setup() {
   const [selectedSolarDataSource, setSelectedSolarDataSource] = useState<string | null>(null);
   const [selectedEmail, setSelectedEmail] = useState('')
   const [solarDataVerified, setSolarDataVerified] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
 
   const enphaseClientId = 'eef7fb7a4aa9834d2988819df395a83c';
 
@@ -69,8 +70,7 @@ export function Setup() {
   };
 
   const sendEmailVerification = () => {
-    console.log(selectedEmail);
-    fetch('/api/register/email', {
+    fetch('/api/email/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -87,7 +87,21 @@ export function Setup() {
   }
 
   const checkEmailVerification = () => {
-    console.log("do nothing")
+    fetch('/api/email/verify', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email: selectedEmail.trim() })
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log('email verified:', data);
+        setEmailVerified(false);
+      })
+      .catch(error => {
+        console.error('email not verified:', error);
+      });
   }
 
   useEffect(() => {
@@ -193,7 +207,7 @@ export function Setup() {
 
       <Space h="md" />
       <div style={{ marginTop: '20px' }}>
-        <Button disabled={true} onClick={authSolarData} color="green">
+        <Button disabled={!emailVerified} onClick={authSolarData} color="green">
           submit
         </Button>
       </div>
