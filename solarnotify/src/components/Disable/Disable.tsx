@@ -39,7 +39,6 @@ export function Disable() {
       {disabledNotificationVisible && (
         <Space h="md" />
       )}
-      <Space h="md" />
       {disabledNotificationVisible && (
         <Notification color="green" onClose={() => setDisabledNotificationVisible(false)}>
           Successfully removed from system.
