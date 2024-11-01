@@ -5,6 +5,7 @@ import classes from './Disable.module.css';
 export function Disable() {
   const [selectedEmail, setSelectedEmail] = useState('')
   const [disabledNotificationVisible, setDisabledNotificationVisible] = useState(false);
+  const [disabledNotificationErrorVisible, setDisabledNotificationErrorVisible] = useState(false);
 
   const cleanup = () => {
     fetch(`/api/email/disable?email=${selectedEmail}`, {
@@ -15,6 +16,7 @@ export function Disable() {
     })
       .then(response => {
         if (!response.ok) {
+          setDisabledNotificationErrorVisible(true);
           throw new Error(`HTTP error during cleanup: ${response.status}`)
         } else {
           return response.json();
@@ -23,6 +25,8 @@ export function Disable() {
       .then(data => {
         if (data.deleted) {
           setDisabledNotificationVisible(true);
+        } else {
+          setDisabledNotificationErrorVisible(true);
         }
       })
       .catch(error => {
@@ -36,12 +40,17 @@ export function Disable() {
       <Title order={5}>
         Email
       </Title>
-      {disabledNotificationVisible && (
+      {(disabledNotificationVisible || disabledNotificationErrorVisible) && (
         <Space h="md" />
       )}
       {disabledNotificationVisible && (
         <Notification color="green" onClose={() => setDisabledNotificationVisible(false)}>
           Successfully removed from system.
+        </Notification>
+      )}
+      {disabledNotificationErrorVisible && (
+        <Notification color="red" onClose={() => setDisabledNotificationErrorVisible(false)}>
+          Email not found or error during cleanup.
         </Notification>
       )}
       <Space h="md" />

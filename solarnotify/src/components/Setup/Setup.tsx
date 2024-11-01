@@ -246,10 +246,10 @@ export function Setup() {
       />
       <div style={{ marginTop: '20px' }}>
         <Flex gap="md">
-          <Button disabled={!solarDataVerified || !selectedEmail} onClick={sendEmailVerification} color="green">
+          <Button disabled={!solarDataVerified || !selectedEmail} onClick={sendEmailVerification} color="green" loaderProps={{ type: 'dots' }}>
             send email verification
           </Button>
-          <Button disabled={!solarDataVerified || !selectedEmail} onClick={checkEmailVerification} color="green">
+          <Button disabled={!solarDataVerified || !selectedEmail} onClick={checkEmailVerification} color="green" loaderProps={{ type: 'dots' }}>
             check email verification
           </Button>
         </Flex>
@@ -270,7 +270,7 @@ export function Setup() {
 
       <Space h="md" />
       <div style={{ marginTop: '20px' }}>
-        <Button disabled={!solarDataVerified || !emailVerified || !notificationOptionsVerified} onClick={authSolarData} color="green">
+        <Button disabled={!solarDataVerified || !emailVerified || !notificationOptionsVerified} onClick={authSolarData} color="green" loaderProps={{ type: 'dots' }}>
           submit
         </Button>
       </div>
