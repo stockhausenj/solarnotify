@@ -87,7 +87,7 @@ export function Setup() {
   }
 
   const checkEmailVerification = () => {
-    fetch(`/api/email/verify?email=${selectedEmail}`, {
+    fetch(`/api/email/verified?email=${selectedEmail}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -95,13 +95,17 @@ export function Setup() {
     })
       .then(response => {
         if (!response.ok) {
-          console.log("network error during email verification");
+          throw new Error(`HTTP error during email verification: ${response.status}`)
         } else {
-          setEmailVerified(true);
+          return response.json();
         }
       })
       .then(data => {
-        console.log("email verificaiton data", data);
+        if (data.verified) {
+          setEmailVerified(true);
+        } else {
+          console.log("email not verified");
+        }
       })
       .catch(error => {
         console.error("error during email verification", error);
