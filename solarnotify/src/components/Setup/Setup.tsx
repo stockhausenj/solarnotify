@@ -87,21 +87,23 @@ export function Setup() {
   }
 
   const checkEmailVerification = () => {
-    fetch('/api/email/verify', {
+    fetch(`/api/email/verify?email=${selectedEmail}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email: selectedEmail.trim() })
+      }
     })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          console.log("network error during email verification");
+        }
+      })
       .then(data => {
-        console.log('email verified:', data);
-        setEmailVerified(false);
+        console.log("email verificaiton data", data);
       })
       .catch(error => {
-        console.error('email not verified:', error);
-      });
+        console.error("error during email verification", error);
+      })
   }
 
   useEffect(() => {
