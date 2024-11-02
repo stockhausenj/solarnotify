@@ -5,15 +5,21 @@ import { IconCheck } from '@tabler/icons-react';
 import classes from './Setup.module.css';
 
 export function Setup() {
+  // loading and verifying systems data
+  const [selectedSolarDataSource, setSelectedSolarDataSource] = useState<string | null>(null);
+  const [systemsDataLoading, setSystemsDataLoading] = useState(false);
+  const [systemsData, setSystemsData] = useState<any>(null)
+  const [solarDataVerified, setSolarDataVerified] = useState(false);
+  const [solarDataErrorNotification, setSolarDataErrorNotification] = useState(false);
+
+  // verifying email
+  const [selectedEmail, setSelectedEmail] = useState('')
+  const [emailVerified, setEmailVerified] = useState(false);
   const [emailSentNotificationVisible, setEmailSentNotificationVisible] = useState(false);
   const [emailSentErrorNotificationVisible, setEmailSentErrorNotificationVisible] = useState(false);
   const [emailNotificationVisible, setEmailNotificationVisible] = useState(false);
-  const [systemsData, setSystemsData] = useState<any>(null)
-  const [systemsDataLoading, setSystemsDataLoading] = useState(false);
-  const [solarDataVerified, setSolarDataVerified] = useState(false);
-  const [selectedSolarDataSource, setSelectedSolarDataSource] = useState<string | null>(null);
-  const [selectedEmail, setSelectedEmail] = useState('')
-  const [emailVerified, setEmailVerified] = useState(false);
+
+  // notification options
   const [notificationOptions, notificationOptionsHandlers] = useListState([
     { label: 'system status', checked: true, index: 0 },
     { label: 'system last production', checked: true, index: 1 },
@@ -65,15 +71,22 @@ export function Setup() {
             },
             body: JSON.stringify({ code, redirectUri, clientId }),
           })
-            .then(response => response.json())
+            .then(response => {
+              setSystemsDataLoading(false);
+              if (response.ok) {
+                return response.json()
+              } else {
+                return Promise.reject('Response not OK');
+              }
+            })
             .then(data => {
               setSystemsData(data);
-              setSystemsDataLoading(false);
               window.history.replaceState({}, document.title, window.location.pathname);
             })
             .catch(error => {
-              console.error('Error during setup:', error);
               setSystemsDataLoading(false);
+              setSolarDataErrorNotification(true);
+              console.error('Error during setup:', error);
             });
         }
     }
@@ -100,7 +113,13 @@ export function Setup() {
       },
       body: JSON.stringify({ email: selectedEmail.trim() })
     })
-      .then(response => response.json())
+      .then(response => {
+        if (response.ok) {
+          return response.json()
+        } else {
+          return Promise.reject('Response not OK');
+        }
+      })
       .then(data => {
         console.log('email send successful:', data);
         setEmailSentNotificationVisible(true);
@@ -179,6 +198,15 @@ export function Setup() {
         Solar Data
         {solarDataVerified && <IconCheck style={{ color: 'green', marginRight: '5px' }} />}
       </Title>
+      {(solarDataErrorNotification) && (
+        <Space h="lg" />
+      )}
+      {solarDataErrorNotification && (
+        <Notification color="red" onClose={() => setSolarDataErrorNotification(false)}>
+          Failed to retrieve solar data. Please retry and/or report issue to site owner.
+        </Notification>
+      )}
+
       <Select
         mt="md"
         classNames={classes}
@@ -218,7 +246,7 @@ export function Setup() {
       <Space h="lg" />
       <Title order={5}>
         Email
-        {emailVerified && <IconCheck style={{ color: 'green', marginRight: '5px' }} />}
+        {(emailVerified && solarDataVerified) && <IconCheck style={{ color: 'green', marginRight: '5px' }} />}
       </Title>
       {(emailNotificationVisible || emailSentNotificationVisible) && (
         <Space h="lg" />
@@ -265,7 +293,7 @@ export function Setup() {
       <Space h="lg" />
       <Title order={5}>
         Notification Rules
-        {(notificationOptionsVerified && emailVerified) && <IconCheck style={{ color: 'green', marginRight: '5px' }} />}
+        {(notificationOptionsVerified && emailVerified && solarDataVerified) && <IconCheck style={{ color: 'green', marginRight: '5px' }} />}
       </Title>
       <Text c="dimmed" size="sm">Rules are evaluated hourly for each system.</Text>
       <Text c="dimmed" size="sm">Production alerts occur if last production is older than 24h.</Text>
