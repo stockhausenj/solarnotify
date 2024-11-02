@@ -18,6 +18,7 @@ export function Setup() {
   const [emailSentNotificationVisible, setEmailSentNotificationVisible] = useState(false);
   const [emailSentErrorNotificationVisible, setEmailSentErrorNotificationVisible] = useState(false);
   const [emailNotificationVisible, setEmailNotificationVisible] = useState(false);
+  const [emailErrorNotificationVisible, setEmailErrorNotificationVisible] = useState(false);
 
   // notification options
   const [notificationOptions, notificationOptionsHandlers] = useListState([
@@ -139,6 +140,7 @@ export function Setup() {
     })
       .then(response => {
         if (!response.ok) {
+          setEmailErrorNotificationVisible(true);
           throw new Error(`HTTP error during email verification: ${response.status}`)
         } else {
           return response.json();
@@ -254,6 +256,11 @@ export function Setup() {
       {emailNotificationVisible && (
         <Notification color="red" onClose={() => setEmailNotificationVisible(false)}>
           Email in system, but not verified yet. Follow link sent in email to verify email. Check spam folder if email not found.
+        </Notification>
+      )}
+      {emailErrorNotificationVisible && (
+        <Notification color="red" onClose={() => setEmailErrorNotificationVisible(false)}>
+          Email not found. Please send verification email.
         </Notification>
       )}
       {emailSentNotificationVisible && (
