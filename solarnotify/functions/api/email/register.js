@@ -8,9 +8,9 @@ export async function onRequest(context) {
   const verificationCode = Math.random().toString(36).substring(2, 10);
 
   const upsertQuery = `
-    INSERT INTO users (email, email_verification_code) 
+    INSERT INTO EMAILS (EMAIL, EMAIL_VERIFICATION_CODE) 
     VALUES (?, ?) 
-    ON CONFLICT(email) DO UPDATE SET email_verification_code = ?`;
+    ON CONFLICT(EMAIL) DO UPDATE SET EMAIL_VERIFICATION_CODE = ?`;
 
   const result = await D1_DATABASE.prepare(upsertQuery)
     .bind(email, verificationCode, verificationCode)

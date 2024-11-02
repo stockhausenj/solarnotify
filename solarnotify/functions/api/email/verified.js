@@ -10,8 +10,8 @@ export async function onRequest(context) {
   }
 
   const selectQuery = `
-      SELECT email_verified FROM users 
-      WHERE email = ?`;
+      SELECT EMAIL_VERIFIED FROM EMAILS 
+      WHERE EMAIL = ?`;
 
   const result = await D1_DATABASE.prepare(selectQuery)
     .bind(email)

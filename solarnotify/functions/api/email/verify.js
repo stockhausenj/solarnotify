@@ -10,8 +10,8 @@ export async function onRequest(context) {
   }
 
   const selectQuery = `
-    SELECT email FROM users 
-    WHERE email_verification_code = ? AND email_verified = 0`;
+    SELECT EMAIL FROM EMAILS 
+    WHERE EMAIL_VERIFICATION_CODE = ? AND EMAIL_VERIFIED = FALSE`;
 
   const result = await D1_DATABASE.prepare(selectQuery)
     .bind(code)
@@ -24,9 +24,9 @@ export async function onRequest(context) {
   const email = result.email;
 
   const updateQuery = `
-    UPDATE users 
-    SET email_verified = 1 
-    WHERE email = ?`;
+    UPDATE EMAILS 
+    SET EMAIL_VERIFIED = TRUE
+    WHERE EMAIL = ?`;
 
   await D1_DATABASE.prepare(updateQuery)
     .bind(email)

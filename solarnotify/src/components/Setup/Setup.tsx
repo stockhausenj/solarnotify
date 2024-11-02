@@ -68,7 +68,7 @@ export function Setup() {
         if (code) {
           setSystemsDataLoading(true);
 
-          fetch('/api/setup', {
+          fetch('/api/solardata/enphase', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ export function Setup() {
               }
             })
             .then(data => {
-              setSystemsData(data);
+              setSystemsData(data.systems);
               window.history.replaceState({}, document.title, window.location.pathname);
             })
             .catch(error => {
