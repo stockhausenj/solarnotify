@@ -21,7 +21,7 @@ export async function onRequest(context) {
     return new Response('Invalid verification code or email already verified', { status: 400 });
   }
 
-  const email = result.email;
+  const email = result.EMAIL;
 
   const updateQuery = `
     UPDATE EMAILS 
