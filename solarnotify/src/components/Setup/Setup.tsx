@@ -27,6 +27,9 @@ export function Setup() {
   ]);
   const [notificationOptionsVerified, setNotificationOptionsVerified] = useState(true);
 
+  // optional data
+  const [selectedSolarInstaller, setSelectedSolarInstaller] = useState<string | null>(null);
+
   const notificationBoxes = notificationOptions.map((value, index) => (
     <Checkbox
       color="green.6"
@@ -156,6 +159,14 @@ export function Setup() {
       .catch(error => {
         console.error("error during email verification", error);
       })
+  }
+
+  const submit = () => {
+    console.log(selectedSolarDataSource);
+    console.log(systemsData);
+    console.log(selectedEmail);
+    console.log(notificationOptions);
+    console.log(selectedSolarInstaller);
   }
 
   useEffect(() => {
@@ -308,10 +319,33 @@ export function Setup() {
       <Stack>
         {notificationBoxes}
       </Stack>
+      <Space h="lg" />
+      <Space h="lg" />
+      <Title order={5}>
+        Optional Inputs
+      </Title>
+      <Select
+        mt="md"
+        classNames={classes}
+        comboboxProps={{ withinPortal: true }}
+        data={['self', 'ION', 'Titan', 'BriteStreet', 'Atlasta', 'GRID']}
+        placeholder="pick one"
+        label="solar installer"
+        value={selectedSolarInstaller}
+        onChange={(value) => {
+          setSelectedSolarInstaller(value);
+        }}
+      />
 
-      <Space h="md" />
+      <Space h="lg" />
+      <Space h="lg" />
+      <Checkbox
+        defaultChecked
+        size="xs"
+        label="Allow your system data to be used for analytics."
+      />
       <div style={{ marginTop: '20px' }}>
-        <Button disabled={!solarDataVerified || !emailVerified || !notificationOptionsVerified} onClick={authSolarData} color="green" loaderProps={{ type: 'dots' }}>
+        <Button disabled={!solarDataVerified || !emailVerified || !notificationOptionsVerified} onClick={submit} color="green" loaderProps={{ type: 'dots' }}>
           submit
         </Button>
       </div>
