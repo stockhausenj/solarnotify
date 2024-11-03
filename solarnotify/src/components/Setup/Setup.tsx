@@ -192,6 +192,7 @@ export function Setup() {
         installer: selectedSolarInstaller,
         allow_analytics: 1,
       };
+      console.log(submitData);
       fetch('/api/solarsystem/system', {
         method: 'POST',
         headers: {
