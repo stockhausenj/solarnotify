@@ -18,7 +18,9 @@ export async function onRequest(context) {
                                  LAST_ENERGY_AT, LO_STATE, LO_CITY, ENPHASE_ACCESS_TOKEN,
                                  ENPHASE_REFRESH_TOKEN, INSTALLER, ALLOW_ANALYTICS) 
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(DATA_SOURCE, SYSTEM_ID) DO UPDATE SET ALLOW_ANALYTICS = EXCLUDED.ALLOW_ANALYTICS`;
+      ON CONFLICT(DATA_SOURCE, SYSTEM_ID) DO UPDATE SET
+        INSTALLER = EXCLUDED.INSTALLER,
+        ALLOW_ANALYTICS = EXCLUDED.ALLOW_ANALYTICS`;
 
     await D1_DATABASE.prepare(query)
       .bind(newId, data_source, system_id, status, status, last_energy_at, state, city,
