@@ -209,7 +209,7 @@ export function Setup() {
         monitor_status: getCheckedValueByKey('status'),
         monitor_production: getCheckedValueByKey('production'),
         installer: optionalInstaller,
-        allow_analytics: 1,
+        allow_analytics: allowAnalytics,
       };
       fetch('/api/solarsystem/system', {
         method: 'POST',
