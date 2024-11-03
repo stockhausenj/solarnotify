@@ -4,6 +4,7 @@ import { MantineProvider, Grid, Container, Tabs } from '@mantine/core';
 import logo from './assets/logo.png';
 import './App.css';
 import { Header } from './components/Header/Header';
+import { Banner } from './components/Banner/Banner';
 import { Welcome } from './components/Welcome/Welcome';
 import { Setup } from './components/Setup/Setup';
 import { Disable } from './components/Disable/Disable';
@@ -17,6 +18,11 @@ export default function App() {
     >
       <Header />
       <Container my="md">
+        <Grid>
+          <Grid.Col span={{ base: 12, xs: 12 }}>
+            <Banner />
+          </Grid.Col>
+        </Grid>
         <Grid>
           <Grid.Col span={{ base: 12, xs: 12 }}>
             <Welcome />
