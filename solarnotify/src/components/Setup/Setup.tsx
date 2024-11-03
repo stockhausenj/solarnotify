@@ -311,7 +311,7 @@ export function Setup() {
         }}
       />
       <div style={{ marginTop: '20px' }}>
-        <Button disabled={!selectedSolarDataSource} onClick={authSolarData} color="green" loading loaderProps={{ type: 'dots' }}>
+        <Button disabled={!selectedSolarDataSource} onClick={authSolarData} color="green">
           verify solar data
         </Button>
       </div>
