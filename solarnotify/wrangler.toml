@@ -1,4 +1,4 @@
 [[d1_databases]]
-binding = "solarnotify"
+binding = "D1_SOLARNOTIFY"
 database_name = "solarnotify"
 database_id = "d4b81514-15b6-41e1-a969-fc3a065d80d9"
