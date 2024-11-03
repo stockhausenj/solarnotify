@@ -47,8 +47,14 @@ export async function onRequest(context) {
 			.bind(email, monitor_status, monitor_production)
 			.run();
 
-		return new Response('success', { status: 200 });
+		return new Response(JSON.stringify({ message: 'success' }), {
+			status: 200,
+			headers: { 'Content-Type': 'application/json' }
+		});
 	} catch (error) {
-		return new Response(`Error: ${error.message}`, { status: 500 });
+		return new Response(JSON.stringify({ error: error.message }), {
+			status: 500,
+			headers: { 'Content-Type': 'application/json' }
+		});
 	}
 }
