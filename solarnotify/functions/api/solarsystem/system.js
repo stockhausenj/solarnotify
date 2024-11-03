@@ -7,6 +7,9 @@ export async function onRequest(context) {
       enphase_refresh_token, email, monitor_status, monitor_production, installer,
       allow_analytics } = await request.json();
 
+    console.log(data_source, system_id, status, last_energy_at, state, city, enphase_access_token,
+      enphase_refresh_token, email, monitor_status, monitor_production, installer, allow_analytics);
+
     const D1_DATABASE = context.env.D1_SOLARNOTIFY;
 
     // Insert or update SOLAR_SYSTEMS
