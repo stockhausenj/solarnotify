@@ -21,7 +21,7 @@ export async function onRequest(context) {
     return new Response('Email not found', { status: 404 });
   }
 
-  const isVerified = result.email_verified === 1;
+  const isVerified = result.EMAIL_VERIFIED === 1;
   return new Response(JSON.stringify({ verified: isVerified }), {
     status: 200,
     headers: { 'Content-Type': 'application/json' },
