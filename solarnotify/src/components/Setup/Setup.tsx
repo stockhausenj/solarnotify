@@ -335,7 +335,7 @@ export function Setup() {
       )}
       {emailErrorNotificationVisible && (
         <Notification color="red" onClose={() => setEmailErrorNotificationVisible(false)}>
-          Email not found. Please send verification email.
+          Email not found. Please send email verification.
         </Notification>
       )}
       {emailSentNotificationVisible && (
