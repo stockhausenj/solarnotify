@@ -149,8 +149,31 @@ async function handleMonitorStatus(email, systemUUID, sendGridAPIKey, D1_DATABAS
   }
 }
 
-function handleMonitorProduction(email, systemUUID, sendGridAPIKey) {
-  console.log(`Monitor production is true for email: ${email}`);
+async function handleMonitorProduction(email, systemUUID, sendGridAPIKey, D1_DATABASE) {
+  console.log(`Checking monitor production for email: ${email} and system UUID: ${systemUUID}`);
+
+  try {
+    const querySystemStatus = `SELECT SYSTEM_ID, LAST_ENERGY_AT FROM SOLAR_SYSTEMS WHERE UUID = ?`;
+    const systemStatusResults = await D1_DATABASE.prepare(querySystemStatus).bind(systemUUID).all();
+    const systemStatusData = systemStatusResults.results;
+
+    if (systemStatusData && systemStatusData.length > 0) {
+      const { SYSTEM_ID, LAST_ENERGY_AT } = systemStatusData[0];
+      const currentTimestamp = Math.floor(Date.now() / 1000);
+
+      if (currentTimestamp - LAST_ENERGY_AT > 86400) {
+        console.log(`LAST_ENERGY_AT for system ID ${SYSTEM_ID} is over 24 hours old.`);
+        await sendProductionEmail(email, SYSTEM_ID, sendGridAPIKey)
+      } else {
+        console.log(`LAST_ENERGY_AT for system ID ${SYSTEM_ID} is within 24 hours.`);
+      }
+    } else {
+      console.error(`No system found with UUID: ${systemUUID}`);
+    }
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 }
 
 async function sendStatusEmail(email, systemId, status, sendGridAPIKey) {
@@ -165,17 +188,57 @@ async function sendStatusEmail(email, systemId, status, sendGridAPIKey) {
         personalizations: [
           {
             to: [{ email }],
-            subject: `Solar Notify - System Status Update - ${status}`
+            subject: `SolarNotify - System Status Update - ${status}`
           }
         ],
         from: {
           email: 'jay.stockhausen@solarnotify.com',
-          name: 'Solar Notify'
+          name: 'SolarNotify'
         },
         content: [
           {
             type: 'text/plain',
             value: `The new status for your system (system ID: ${systemId}) is: ${status}`
+          }
+        ]
+      })
+    });
+
+    if (response.ok) {
+      console.log(`Email sent successfully to ${email}`);
+    } else {
+      console.error(`Failed to send email. Status: ${response.status}`);
+      const responseBody = await response.text();
+      console.error('Response body:', responseBody);
+    }
+  } catch (error) {
+    console.error('Error sending email:', error);
+  }
+}
+
+async function sendProductionEmail(email, systemId, status, sendGridAPIKey) {
+  try {
+    const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${sendGridAPIKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        personalizations: [
+          {
+            to: [{ email }],
+            subject: `SolarNotify - System Status Update - ${status}`
+          }
+        ],
+        from: {
+          email: 'jay.stockhausen@solarnotify.com',
+          name: 'SolarNotify'
+        },
+        content: [
+          {
+            type: 'text/plain',
+            value: `No production from your system (system ID: ${systemId}) over at least the last 24 hours`
           }
         ]
       })

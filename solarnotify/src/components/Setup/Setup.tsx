@@ -18,7 +18,7 @@ interface systemAuthType {
 }
 
 export function Setup() {
-  // loading and verifying systems data
+  // loading and verifying systems data state
   const [selectedSolarDataSource, setSelectedSolarDataSource] = useState<string | null>(null);
   const [systemsDataLoading, setSystemsDataLoading] = useState(false);
   const [systemsData, setSystemsData] = useState<systemType[]>([]);
@@ -29,13 +29,15 @@ export function Setup() {
   const [solarDataVerified, setSolarDataVerified] = useState(false);
   const [solarDataErrorNotification, setSolarDataErrorNotification] = useState(false);
 
-  // verifying email
+  // verifying email state
   const [selectedEmail, setSelectedEmail] = useState('')
   const [emailVerified, setEmailVerified] = useState(false);
   const [emailSentNotificationVisible, setEmailSentNotificationVisible] = useState(false);
   const [emailSentErrorNotificationVisible, setEmailSentErrorNotificationVisible] = useState(false);
   const [emailNotificationVisible, setEmailNotificationVisible] = useState(false);
   const [emailErrorNotificationVisible, setEmailErrorNotificationVisible] = useState(false);
+  const [loadingSendEmailVerification, setLoadingSendEmailVerification] = useState(false);
+  const [loadingCheckEmailVerification, setLoadingCheckEmailVerification] = useState(false);
 
   // notification options
   const [notificationOptions, notificationOptionsHandlers] = useListState([
@@ -56,6 +58,9 @@ export function Setup() {
   const allowAnalyticsHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAllowAnalytics(event.currentTarget.checked);
   }
+
+  // submit state
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
 
   const notificationBoxes = notificationOptions.map((value, index) => (
     <Checkbox
@@ -139,6 +144,7 @@ export function Setup() {
   };
 
   const sendEmailVerification = () => {
+    setLoadingSendEmailVerification(true);
     fetch('/api/email/register', {
       method: 'POST',
       headers: {
@@ -161,9 +167,11 @@ export function Setup() {
         console.error('email send fail:', error);
         setEmailSentErrorNotificationVisible(true);
       });
+    setLoadingSendEmailVerification(false);
   }
 
   const checkEmailVerification = () => {
+    setLoadingCheckEmailVerification(true);
     fetch(`/api/email/verified?email=${selectedEmail}`, {
       method: 'GET',
       headers: {
@@ -173,6 +181,7 @@ export function Setup() {
       .then(response => {
         if (!response.ok) {
           setEmailErrorNotificationVisible(true);
+          setLoadingCheckEmailVerification(false);
           throw new Error(`HTTP error during email verification: ${response.status}`)
         } else {
           return response.json();
@@ -188,9 +197,11 @@ export function Setup() {
       .catch(error => {
         console.error("error during email verification", error);
       })
+    setLoadingCheckEmailVerification(false);
   }
 
   const submit = () => {
+    setLoadingSubmit(true);
     systemsData.forEach(system => {
       let optionalInstaller = selectedSolarInstaller;
       if (optionalInstaller === null) {
@@ -219,6 +230,7 @@ export function Setup() {
         body: JSON.stringify(submitData)
       })
         .then(response => {
+          setLoadingSubmit(false);
           if (!response.ok) {
             throw new Error('Network response was not ok');
           }
@@ -228,6 +240,7 @@ export function Setup() {
           console.log('Response body:', data);
         })
         .catch(error => {
+          setLoadingSubmit(false);
           console.error('Error:', error);
         });
     });
@@ -298,7 +311,7 @@ export function Setup() {
         }}
       />
       <div style={{ marginTop: '20px' }}>
-        <Button disabled={!selectedSolarDataSource} onClick={authSolarData} color="green">
+        <Button disabled={!selectedSolarDataSource} onClick={authSolarData} color="green" loading loaderProps={{ type: 'dots' }}>
           verify solar data
         </Button>
       </div>
@@ -362,10 +375,10 @@ export function Setup() {
       />
       <div style={{ marginTop: '20px' }}>
         <Flex gap="md">
-          <Button disabled={!solarDataVerified || !selectedEmail} onClick={sendEmailVerification} color="green" loaderProps={{ type: 'dots' }}>
+          <Button disabled={!solarDataVerified || !selectedEmail} onClick={sendEmailVerification} color="green" loading={loadingSendEmailVerification} loaderProps={{ type: 'dots' }}>
             send email verification
           </Button>
-          <Button disabled={!solarDataVerified || !selectedEmail} onClick={checkEmailVerification} color="green" loaderProps={{ type: 'dots' }}>
+          <Button disabled={!solarDataVerified || !selectedEmail} onClick={checkEmailVerification} color="green" loading={loadingCheckEmailVerification} loaderProps={{ type: 'dots' }}>
             check email verification
           </Button>
         </Flex>
@@ -410,7 +423,7 @@ export function Setup() {
         onChange={allowAnalyticsHandler}
       />
       <div style={{ marginTop: '20px' }}>
-        <Button disabled={!solarDataVerified || !emailVerified || !notificationOptionsVerified} onClick={submit} color="green" loaderProps={{ type: 'dots' }}>
+        <Button disabled={!solarDataVerified || !emailVerified || !notificationOptionsVerified} onClick={submit} color="green" loading={loadingSubmit} loaderProps={{ type: 'dots' }}>
           submit
         </Button>
       </div>
