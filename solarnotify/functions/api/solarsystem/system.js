@@ -34,7 +34,7 @@ export async function onRequest(context) {
     // Insert or ignore in EMAIL_SYSTEMS_MAPPING
     newId = uuidv4();
     query = `
-      INSERT INTO EMAIL_SYSTEMS_MAPPING (UUID, EMAIL, SOLAR_SYSTEM)
+      INSERT INTO EMAIL_SYSTEM_MAPPING (UUID, EMAIL, SOLAR_SYSTEM)
       VALUES (?, ?, ?)
       ON CONFLICT(EMAIL, SOLAR_SYSTEM) DO NOTHING`;
 
