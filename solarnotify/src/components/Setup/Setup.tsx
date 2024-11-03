@@ -4,11 +4,20 @@ import { useListState } from '@mantine/hooks';
 import { IconCheck } from '@tabler/icons-react';
 import classes from './Setup.module.css';
 
+interface systemType {
+  city: string;
+  state: string;
+  system_id: number;
+  last_energy_at: number;
+  status: string;
+}
+
+
 export function Setup() {
   // loading and verifying systems data
   const [selectedSolarDataSource, setSelectedSolarDataSource] = useState<string | null>(null);
   const [systemsDataLoading, setSystemsDataLoading] = useState(false);
-  const [systemsData, setSystemsData] = useState<any>(null)
+  const [systemsData, setSystemsData] = useState<systemType[]>([]);
   const [solarDataVerified, setSolarDataVerified] = useState(false);
   const [solarDataErrorNotification, setSolarDataErrorNotification] = useState(false);
 
@@ -22,10 +31,14 @@ export function Setup() {
 
   // notification options
   const [notificationOptions, notificationOptionsHandlers] = useListState([
-    { label: 'system status', checked: true, index: 0 },
-    { label: 'system last production', checked: true, index: 1 },
+    { key: 'status', label: 'system status', checked: true, index: 0 },
+    { key: 'production', label: 'system last production', checked: true, index: 1 },
   ]);
   const [notificationOptionsVerified, setNotificationOptionsVerified] = useState(true);
+  const getCheckedValueByKey = (key: string) => {
+    const item = notificationOptions.find(option => option.key === key);
+    return item ? item.checked : undefined;
+  };
 
   // optional data
   const [selectedSolarInstaller, setSelectedSolarInstaller] = useState<string | null>(null);
@@ -64,6 +77,7 @@ export function Setup() {
       case "Enphase":
         const params = new URLSearchParams(window.location.search);
         const code = params.get('code');
+        console.log("CODE", code);
         const clientId = enphaseClientId;
         if (code) {
           setSystemsDataLoading(true);
@@ -162,11 +176,33 @@ export function Setup() {
   }
 
   const submit = () => {
-    console.log(selectedSolarDataSource);
-    console.log(systemsData);
-    console.log(selectedEmail);
-    console.log(notificationOptions);
-    console.log(selectedSolarInstaller);
+    systemsData.forEach(system => {
+      let submitData = {
+        data_source: selectedSolarDataSource,
+        system_id: system.system_id,
+        status: system.status,
+        last_energy_at: system.last_energy_at,
+        state: system.state,
+        city: system.city,
+        enphase_access_token: "abc",
+        enphase_refresh_token: "abc",
+        email: selectedEmail,
+        monitor_status: getCheckedValueByKey('status'),
+        monitor_production: getCheckedValueByKey('production'),
+        installer: selectedSolarInstaller,
+        allow_analytics: 1,
+      };
+      fetch('/api/solarsystem/system', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ submitData })
+      })
+        .then(response => {
+          console.log(response);
+        })
+    });
   }
 
   useEffect(() => {
