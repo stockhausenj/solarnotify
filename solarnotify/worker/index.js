@@ -52,6 +52,7 @@ export default {
 
       for (const mapping of emailSystemData) {
         const email = mapping.EMAIL;
+        const systemUUID = mapping.SOLAR_SYSTEM;
         const queryEmails = `SELECT MONITOR_STATUS, MONITOR_PRODUCTION FROM EMAILS WHERE EMAIL = ?`;
         const emailResults = await D1_DATABASE.prepare(queryEmails).bind(email).all();
         const emailData = emailResults.results;
@@ -59,10 +60,10 @@ export default {
         if (emailData && emailData.length > 0) {
           const { MONITOR_STATUS, MONITOR_PRODUCTION } = emailData[0];
           if (MONITOR_STATUS === 1) {
-            handleMonitorStatus(email);
+            handleMonitorStatus(email, systemUUID, env.SENDGRID_API_KEY);
           }
           if (MONITOR_PRODUCTION === 1) {
-            handleMonitorProduction(email);
+            handleMonitorProduction(email, systemUUID, env.SENDGRID_API_KEY);
           }
         }
       }
@@ -124,10 +125,65 @@ async function fetchEnphaseData(accessToken, systemId, enphaseAPIKey) {
   }
 }
 
-function handleMonitorStatus(email) {
-  console.log(`Monitor status is true for email: ${email}`);
+async function handleMonitorStatus(email, systemUUID, sendGridAPIKey) {
+  console.log(`Checking monitor status for email: ${email} and system UUID: ${systemUUID}`);
+
+  const querySystemStatus = `SELECT SYSTEM_ID, STATUS, LAST_STATUS FROM SOLAR_SYSTEMS WHERE UUID = ?`;
+  const systemStatusResults = await D1_DATABASE.prepare(querySystemStatus).bind(systemUUID).all();
+  const systemStatusData = systemStatusResults.results;
+
+  if (systemStatusData && systemStatusData.length > 0) {
+    const { SYSTEM_ID, STATUS, LAST_STATUS } = systemStatusData[0];
+
+    if (STATUS !== LAST_STATUS) {
+      console.log(`STATUS and LAST_STATUS do not match for system UUID: ${systemUUID}`);
+      await sendStatusEmail(email, SYSTEM_ID, STATUS, sendGridAPIKey);
+    }
+  } else {
+    console.error(`No system found with UUID: ${systemUUID}`);
+  }
 }
 
-function handleMonitorProduction(email) {
+function handleMonitorProduction(email, systemUUID, sendGridAPIKey) {
   console.log(`Monitor production is true for email: ${email}`);
+}
+
+async function sendStatusEmail(email, systemId, status, sendGridAPIKey) {
+  try {
+    const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${sendGridAPIKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        personalizations: [
+          {
+            to: [{ email }],
+            subject: `Solar Notify - System Status Update - ${status}`
+          }
+        ],
+        from: {
+          email: 'jay.stockhausen@solarnotify.com', // Replace with your sender email
+          name: 'Solar Notify'
+        },
+        content: [
+          {
+            type: 'text/plain',
+            value: `The new status for your system (system ID: ${systemId}) is: ${status}`
+          }
+        ]
+      })
+    });
+
+    if (response.ok) {
+      console.log(`Email sent successfully to ${email}`);
+    } else {
+      console.error(`Failed to send email. Status: ${response.status}`);
+      const responseBody = await response.text();
+      console.error('Response body:', responseBody);
+    }
+  } catch (error) {
+    console.error('Error sending email:', error);
+  }
 }
