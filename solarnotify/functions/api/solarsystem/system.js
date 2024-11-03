@@ -21,16 +21,12 @@ export async function onRequest(context) {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(DATA_SOURCE, SYSTEM_ID) DO UPDATE SET ALLOW_ANALYTICS = EXCLUDED.ALLOW_ANALYTICS`;
 
-    console.log("before first query");
-
     const response = await D1_DATABASE.prepare(query)
       .bind(newId, data_source, system_id, status, status, last_energy_at, state, city,
         enphase_access_token, enphase_refresh_token, installer, allow_analytics)
       .run();
 
     console.log(response);
-
-    console.log("after first query");
 
     // Insert or ignore in EMAIL_SYSTEMS_MAPPING
     newId = uuidv4();
