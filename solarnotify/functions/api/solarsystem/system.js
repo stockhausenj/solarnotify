@@ -4,13 +4,17 @@ export async function onRequest(context) {
   try {
     const { request } = context;
     const requestBody = await request.json();
+    /*
     const { data_source, system_id, status, last_energy_at, state, city, enphase_access_token,
       enphase_refresh_token, email, monitor_status, monitor_production, installer,
       allow_analytics } = await request.json();
 
-    console.log(requestBody);
+    //console.log(requestBody);
     console.log(data_source, system_id, status, last_energy_at, state, city, enphase_access_token,
       enphase_refresh_token, email, monitor_status, monitor_production, installer, allow_analytics);
+    */
+
+    console.log(requestBody);
 
     const D1_DATABASE = context.env.D1_SOLARNOTIFY;
 

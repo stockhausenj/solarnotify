@@ -189,7 +189,7 @@ export function Setup() {
         email: selectedEmail,
         monitor_status: getCheckedValueByKey('status'),
         monitor_production: getCheckedValueByKey('production'),
-        installer: selectedSolarInstaller,
+        installer: "ION",
         allow_analytics: 1,
       };
       console.log(submitData);
