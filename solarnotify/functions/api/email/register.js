@@ -24,7 +24,10 @@ export async function onRequest(context) {
     personalizations: [
       { to: [{ email: email }] },
     ],
-    from: { email: "jay.stockhausen@solarnotify.com" },
+    from: {
+      email: 'jay.stockhausen@solarnotify.com',
+      name: 'Solar Notify'
+    },
     subject: "SolarNotify - Email Verification",
     content: [
       {

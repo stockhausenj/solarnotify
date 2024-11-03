@@ -60,7 +60,7 @@ export default {
         if (emailData && emailData.length > 0) {
           const { MONITOR_STATUS, MONITOR_PRODUCTION } = emailData[0];
           if (MONITOR_STATUS === 1) {
-            handleMonitorStatus(email, systemUUID, env.SENDGRID_API_KEY);
+            await handleMonitorStatus(email, systemUUID, env.SENDGRID_API_KEY, D1_DATABASE);
           }
           if (MONITOR_PRODUCTION === 1) {
             handleMonitorProduction(email, systemUUID, env.SENDGRID_API_KEY);
@@ -125,22 +125,27 @@ async function fetchEnphaseData(accessToken, systemId, enphaseAPIKey) {
   }
 }
 
-async function handleMonitorStatus(email, systemUUID, sendGridAPIKey) {
+async function handleMonitorStatus(email, systemUUID, sendGridAPIKey, D1_DATABASE) {
   console.log(`Checking monitor status for email: ${email} and system UUID: ${systemUUID}`);
 
-  const querySystemStatus = `SELECT SYSTEM_ID, STATUS, LAST_STATUS FROM SOLAR_SYSTEMS WHERE UUID = ?`;
-  const systemStatusResults = await D1_DATABASE.prepare(querySystemStatus).bind(systemUUID).all();
-  const systemStatusData = systemStatusResults.results;
+  try {
+    const querySystemStatus = `SELECT SYSTEM_ID, STATUS, LAST_STATUS FROM SOLAR_SYSTEMS WHERE UUID = ?`;
+    const systemStatusResults = await D1_DATABASE.prepare(querySystemStatus).bind(systemUUID).all();
+    const systemStatusData = systemStatusResults.results;
 
-  if (systemStatusData && systemStatusData.length > 0) {
-    const { SYSTEM_ID, STATUS, LAST_STATUS } = systemStatusData[0];
+    if (systemStatusData && systemStatusData.length > 0) {
+      const { SYSTEM_ID, STATUS, LAST_STATUS } = systemStatusData[0];
 
-    if (STATUS !== LAST_STATUS) {
-      console.log(`STATUS and LAST_STATUS do not match for system UUID: ${systemUUID}`);
-      await sendStatusEmail(email, SYSTEM_ID, STATUS, sendGridAPIKey);
+      if (STATUS !== LAST_STATUS) {
+        console.log(`STATUS and LAST_STATUS do not match for system UUID: ${systemUUID}`);
+        await sendStatusEmail(email, SYSTEM_ID, STATUS, sendGridAPIKey);
+      }
+    } else {
+      console.error(`No system found with UUID: ${systemUUID}`);
     }
-  } else {
-    console.error(`No system found with UUID: ${systemUUID}`);
+  } catch (error) {
+    console.log(error);
+    throw error;
   }
 }
 
@@ -164,7 +169,7 @@ async function sendStatusEmail(email, systemId, status, sendGridAPIKey) {
           }
         ],
         from: {
-          email: 'jay.stockhausen@solarnotify.com', // Replace with your sender email
+          email: 'jay.stockhausen@solarnotify.com',
           name: 'Solar Notify'
         },
         content: [
