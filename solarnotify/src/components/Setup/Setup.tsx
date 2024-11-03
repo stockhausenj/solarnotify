@@ -12,12 +12,20 @@ interface systemType {
   status: string;
 }
 
+interface systemAuthType {
+  access_token: string;
+  refresh_token: string;
+}
 
 export function Setup() {
   // loading and verifying systems data
   const [selectedSolarDataSource, setSelectedSolarDataSource] = useState<string | null>(null);
   const [systemsDataLoading, setSystemsDataLoading] = useState(false);
   const [systemsData, setSystemsData] = useState<systemType[]>([]);
+  const [systemsAuthData, setSystemsAuthData] = useState<systemAuthType>({
+    access_token: "None",
+    refresh_token: "None"
+  });
   const [solarDataVerified, setSolarDataVerified] = useState(false);
   const [solarDataErrorNotification, setSolarDataErrorNotification] = useState(false);
 
@@ -40,8 +48,14 @@ export function Setup() {
     return item ? item.checked : undefined;
   };
 
-  // optional data
+  // optional inputs
   const [selectedSolarInstaller, setSelectedSolarInstaller] = useState<string | null>(null);
+
+  // data options
+  const [allowAnalytics, setAllowAnalytics] = useState(true);
+  const allowAnalyticsHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setAllowAnalytics(event.currentTarget.checked);
+  }
 
   const notificationBoxes = notificationOptions.map((value, index) => (
     <Checkbox
@@ -99,6 +113,7 @@ export function Setup() {
             })
             .then(data => {
               setSystemsData(data.systems);
+              setSystemsAuthData(data.auth);
               window.history.replaceState({}, document.title, window.location.pathname);
             })
             .catch(error => {
@@ -177,6 +192,10 @@ export function Setup() {
 
   const submit = () => {
     systemsData.forEach(system => {
+      let optionalInstaller = selectedSolarInstaller;
+      if (optionalInstaller === null) {
+        optionalInstaller = "None";
+      }
       let submitData = {
         data_source: selectedSolarDataSource,
         system_id: system.system_id,
@@ -184,15 +203,14 @@ export function Setup() {
         last_energy_at: system.last_energy_at,
         state: system.state,
         city: system.city,
-        enphase_access_token: "abc",
-        enphase_refresh_token: "abc",
+        enphase_access_token: systemsAuthData.access_token,
+        enphase_refresh_token: systemsAuthData.refresh_token,
         email: selectedEmail,
         monitor_status: getCheckedValueByKey('status'),
         monitor_production: getCheckedValueByKey('production'),
-        installer: "ION",
+        installer: optionalInstaller,
         allow_analytics: 1,
       };
-      console.log(submitData);
       fetch('/api/solarsystem/system', {
         method: 'POST',
         headers: {
@@ -386,9 +404,10 @@ export function Setup() {
       <Space h="lg" />
       <Space h="lg" />
       <Checkbox
-        defaultChecked
+        checked={allowAnalytics}
         size="xs"
         label="Allow your system data to be used for analytics."
+        onChange={allowAnalyticsHandler}
       />
       <div style={{ marginTop: '20px' }}>
         <Button disabled={!solarDataVerified || !emailVerified || !notificationOptionsVerified} onClick={submit} color="green" loaderProps={{ type: 'dots' }}>
