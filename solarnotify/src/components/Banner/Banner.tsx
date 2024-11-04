@@ -11,7 +11,7 @@ export function Banner() {
       )}
       {notificationVisible && (
         <Notification color="blue" onClose={() => setNotificationVisible(false)}>
-          This site is new. Contact jay.stockhausen@solarnotify.com with any questions.
+          This site is undergoing user acceptance testing. Contact jay.stockhausen@solarnotify.com with any questions.
         </Notification>
       )}
     </>

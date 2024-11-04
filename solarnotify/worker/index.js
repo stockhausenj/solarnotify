@@ -1,78 +1,86 @@
-export default {
-  async fetch(request, env) {
-    const D1_DATABASE = env.D1_SOLARNOTIFY;
+async function mainHandler(env) {
+  const D1_DATABASE = env.D1_SOLARNOTIFY;
 
-    const querySystems = `SELECT UUID, SYSTEM_ID, STATUS, LAST_STATUS, LAST_ENERGY_AT, ENPHASE_REFRESH_TOKEN FROM SOLAR_SYSTEMS`;
+  const querySystems = `SELECT UUID, SYSTEM_ID, STATUS, LAST_STATUS, LAST_ENERGY_AT, ENPHASE_REFRESH_TOKEN FROM SOLAR_SYSTEMS`;
 
-    try {
-      const systemResults = await D1_DATABASE.prepare(querySystems).all();
-      const systemData = systemResults.results;
+  try {
+    const systemResults = await D1_DATABASE.prepare(querySystems).all();
+    const systemData = systemResults.results;
 
-      if (!Array.isArray(systemData) || systemData.length === 0) {
-        console.log('No systems found.');
-        return new Response('No solar systems found.', { status: 404 });
-      }
-
-      for (const system of systemData) {
-        const { UUID, SYSTEM_ID, STATUS, ENPHASE_REFRESH_TOKEN } = system;
-
-        // Update LAST_STATUS to current STATUS
-        await D1_DATABASE.prepare(`UPDATE SOLAR_SYSTEMS SET LAST_STATUS = ? WHERE UUID = ?`)
-          .bind(STATUS, UUID)
-          .run();
-
-        const newTokens = await refreshAccessToken(ENPHASE_REFRESH_TOKEN, env);
-        if (!newTokens) {
-          console.error(`Failed to refresh access token for system ID: ${UUID}`);
-          continue;
-        }
-
-        const { newAccessToken, newRefreshToken } = newTokens;
-
-        const enphaseData = await fetchEnphaseData(newAccessToken, SYSTEM_ID, env.ENPHASE_API_KEY);
-        if (!enphaseData) {
-          console.error(`Failed to fetch Enphase data for system ID: ${UUID}`);
-          continue;
-        }
-
-        await D1_DATABASE.prepare(
-          `UPDATE SOLAR_SYSTEMS SET STATUS = ?, LAST_ENERGY_AT = ?, ENPHASE_ACCESS_TOKEN = ?, ENPHASE_REFRESH_TOKEN = ? WHERE UUID = ?`
-        )
-          .bind(enphaseData.status, enphaseData.lastEnergyAt, newAccessToken, newRefreshToken, UUID)
-          .run();
-      }
-
-      const queryEmailSystem = `SELECT EMAIL, SOLAR_SYSTEM FROM EMAIL_SYSTEM_MAPPING`;
-      const emailSystemResults = await D1_DATABASE.prepare(queryEmailSystem).all();
-      const emailSystemData = emailSystemResults.results;
-
-      if (!Array.isArray(emailSystemData) || emailSystemData.length === 0) {
-        return new Response('No email system mappings found.', { status: 404 });
-      }
-
-      for (const mapping of emailSystemData) {
-        const email = mapping.EMAIL;
-        const systemUUID = mapping.SOLAR_SYSTEM;
-        const queryEmails = `SELECT MONITOR_STATUS, MONITOR_PRODUCTION FROM EMAILS WHERE EMAIL = ?`;
-        const emailResults = await D1_DATABASE.prepare(queryEmails).bind(email).all();
-        const emailData = emailResults.results;
-
-        if (emailData && emailData.length > 0) {
-          const { MONITOR_STATUS, MONITOR_PRODUCTION } = emailData[0];
-          if (MONITOR_STATUS === 1) {
-            await handleMonitorStatus(email, systemUUID, env.SENDGRID_API_KEY, D1_DATABASE);
-          }
-          if (MONITOR_PRODUCTION === 1) {
-            handleMonitorProduction(email, systemUUID, env.SENDGRID_API_KEY);
-          }
-        }
-      }
-
-      return new Response('Worker executed successfully.', { status: 200 });
-    } catch (error) {
-      console.error('Database query error:', error);
-      return new Response('Error accessing database', { status: 500 });
+    if (!Array.isArray(systemData) || systemData.length === 0) {
+      console.log('No systems found.');
+      return new Response('No solar systems found.', { status: 404 });
     }
+
+    for (const system of systemData) {
+      const { UUID, SYSTEM_ID, STATUS, ENPHASE_REFRESH_TOKEN } = system;
+
+      // Update LAST_STATUS to current STATUS
+      await D1_DATABASE.prepare(`UPDATE SOLAR_SYSTEMS SET LAST_STATUS = ? WHERE UUID = ?`)
+        .bind(STATUS, UUID)
+        .run();
+
+      const newTokens = await refreshAccessToken(ENPHASE_REFRESH_TOKEN, env);
+      if (!newTokens) {
+        console.error(`Failed to refresh access token for system ID: ${UUID}`);
+        continue;
+      }
+
+      const { newAccessToken, newRefreshToken } = newTokens;
+
+      const enphaseData = await fetchEnphaseData(newAccessToken, SYSTEM_ID, env.ENPHASE_API_KEY);
+      if (!enphaseData) {
+        console.error(`Failed to fetch Enphase data for system ID: ${UUID}`);
+        continue;
+      }
+
+      await D1_DATABASE.prepare(
+        `UPDATE SOLAR_SYSTEMS SET STATUS = ?, LAST_ENERGY_AT = ?, ENPHASE_ACCESS_TOKEN = ?, ENPHASE_REFRESH_TOKEN = ? WHERE UUID = ?`
+      )
+        .bind(enphaseData.status, enphaseData.lastEnergyAt, newAccessToken, newRefreshToken, UUID)
+        .run();
+    }
+
+    const queryEmailSystem = `SELECT EMAIL, SOLAR_SYSTEM FROM EMAIL_SYSTEM_MAPPING`;
+    const emailSystemResults = await D1_DATABASE.prepare(queryEmailSystem).all();
+    const emailSystemData = emailSystemResults.results;
+
+    if (!Array.isArray(emailSystemData) || emailSystemData.length === 0) {
+      return new Response('No email system mappings found.', { status: 404 });
+    }
+
+    for (const mapping of emailSystemData) {
+      const email = mapping.EMAIL;
+      const systemUUID = mapping.SOLAR_SYSTEM;
+      const queryEmails = `SELECT MONITOR_STATUS, MONITOR_PRODUCTION FROM EMAILS WHERE EMAIL = ?`;
+      const emailResults = await D1_DATABASE.prepare(queryEmails).bind(email).all();
+      const emailData = emailResults.results;
+
+      if (emailData && emailData.length > 0) {
+        const { MONITOR_STATUS, MONITOR_PRODUCTION } = emailData[0];
+        if (MONITOR_STATUS === 1) {
+          await handleMonitorStatus(email, systemUUID, env.SENDGRID_API_KEY, D1_DATABASE);
+        }
+        if (MONITOR_PRODUCTION === 1) {
+          handleMonitorProduction(email, systemUUID, env.SENDGRID_API_KEY);
+        }
+      }
+    }
+
+    return new Response('Worker executed successfully.', { status: 200 });
+  } catch (error) {
+    console.error('Database query error:', error);
+    return new Response('Error accessing database', { status: 500 });
+  }
+}
+
+export default {
+  async scheduled(event, env, context) {
+    await mainHandler(env);
+  },
+
+  async fetch(request, env) {
+    await mainHandler(env);
   }
 };
 
