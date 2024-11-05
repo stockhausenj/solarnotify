@@ -86,7 +86,6 @@ export function Setup() {
     switch (selectedSolarDataSource) {
       case "Enphase":
         console.log("validating enphase data")
-        console.log('Setup successful:', systemsData);
         setSolarDataVerified(true);
     }
   }
@@ -96,8 +95,6 @@ export function Setup() {
       case "Enphase":
         const params = new URLSearchParams(window.location.search);
         const code = params.get('code');
-        console.log("CODE", code);
-        const clientId = enphaseClientId;
         if (code) {
           setSystemsDataLoading(true);
 
@@ -106,10 +103,9 @@ export function Setup() {
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ code, redirectUri, clientId }),
+            body: JSON.stringify({ code, redirectUri, clientId: enphaseClientId }),
           })
             .then(response => {
-              setSystemsDataLoading(false);
               if (response.ok) {
                 return response.json()
               } else {
@@ -117,6 +113,7 @@ export function Setup() {
               }
             })
             .then(data => {
+              setSystemsDataLoading(false);
               setSystemsData(data.systems);
               setSystemsAuthData(data.auth);
               window.history.replaceState({}, document.title, window.location.pathname);
@@ -133,9 +130,8 @@ export function Setup() {
   const authSolarData = () => {
     switch (selectedSolarDataSource) {
       case "Enphase":
-        const clientId = enphaseClientId;
         const authEndpoint = 'https://api.enphaseenergy.com/oauth/authorize';
-        const authUrl = `${authEndpoint}?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+        const authUrl = `${authEndpoint}?response_type=code&client_id=${enphaseClientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
         window.location.href = authUrl;
     }
     if (selectedSolarDataSource) {
@@ -154,14 +150,10 @@ export function Setup() {
     })
       .then(response => {
         if (response.ok) {
-          return response.json()
+          setEmailSentNotificationVisible(true);
         } else {
           return Promise.reject('Response not OK');
         }
-      })
-      .then(data => {
-        console.log('email send successful:', data);
-        setEmailSentNotificationVisible(true);
       })
       .catch(error => {
         console.error('email send fail:', error);
