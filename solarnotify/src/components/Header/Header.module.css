@@ -3,6 +3,15 @@
   margin-bottom: 20px;
   background-color: var(--mantine-color-body);
   border-bottom: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  --container-size-xs: calc(33.75rem * var(--mantine-scale));
+  --container-size-sm: calc(45rem * var(--mantine-scale));
+  --container-size-md: calc(60rem * var(--mantine-scale));
+  --container-size-lg: calc(71.25rem * var(--mantine-scale));
+  --container-size-xl: calc(82.5rem * var(--mantine-scale));
+  --container-size: var(--container-size-md);
+  max-width: var(--container-size);
+  padding-inline: var(--mantine-spacing-md);
+  margin-inline: auto;
 }
 
 .inner {
