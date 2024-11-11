@@ -1,21 +1,33 @@
 import { Space } from '@mantine/core';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 export function LiveData() {
-	// Define the type for our data
 	type ChartData = {
 		name: string;
 		count: number;
 	};
 
-	// Sample data for the chart
-	const data: ChartData[] = [
-		{ name: 'Page A', count: 400 },
-		{ name: 'Page B', count: 300 },
-		{ name: 'Page C', count: 200 },
-		{ name: 'Page D', count: 278 },
-		{ name: 'Page E', count: 189 },
-	];
+	const [data, setData] = useState<ChartData[]>([]);
+
+	const fetchData = async () => {
+		try {
+			const response = await axios.get('/api/livedata/status');
+			setData(response.data);
+		} catch (error) {
+			console.error('Error fetching data:', error);
+		}
+	};
+
+	useEffect(() => {
+		fetchData();
+
+		const intervalId = setInterval(fetchData, 30000);
+
+		return () => clearInterval(intervalId);
+	}, []);
+
 	return (
 		<>
 			<Space h="lg" />
