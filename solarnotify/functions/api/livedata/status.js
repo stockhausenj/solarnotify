@@ -3,7 +3,7 @@ export async function onRequest(context) {
     const D1_DATABASE = context.env.D1_SOLARNOTIFY;
 
     let query = `
-      SELECT DATA_SOURCE || ' ' || STATUS AS name, COUNT(*) AS count
+      SELECT STATUS AS name, COUNT(*) AS count
       FROM SOLAR_SYSTEMS
       GROUP BY DATA_SOURCE, STATUS`;
 
