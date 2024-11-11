@@ -32,7 +32,7 @@ export function LiveData() {
     <>
       <Space h="lg" />
       <Title order={5}>
-        Status
+        Solar System Status
       </Title>
       <Space h="lg" />
       <ResponsiveContainer width="100%" height={400}>
@@ -42,7 +42,7 @@ export function LiveData() {
           <YAxis />
           <Tooltip />
           <Legend />
-          <Bar dataKey="count" fill="#8884d8" />
+          <Bar dataKey="count" fill="#8884d8" name="systems" />
         </BarChart>
       </ResponsiveContainer>
     </>
