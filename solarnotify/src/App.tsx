@@ -9,6 +9,7 @@ import { Welcome } from './components/Welcome/Welcome';
 import { Setup } from './components/Setup/Setup';
 import { Disable } from './components/Disable/Disable';
 import { Footer } from './components/Footer/Footer';
+import { LiveData } from './components/LiveData/LiveData';
 
 export default function App() {
 
@@ -41,12 +42,18 @@ export default function App() {
                 <Tabs.Tab value="Disable">
                   Disable
                 </Tabs.Tab>
+                <Tabs.Tab value="Live Data">
+                  Live Data (experimental)
+                </Tabs.Tab>
               </Tabs.List>
               <Tabs.Panel value="Setup">
                 <Setup />
               </Tabs.Panel>
               <Tabs.Panel value="Disable">
                 <Disable />
+              </Tabs.Panel>
+              <Tabs.Panel value="Live Data">
+                <LiveData />
               </Tabs.Panel>
             </Tabs>
           </Grid.Col>
