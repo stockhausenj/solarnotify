@@ -38,6 +38,16 @@ npx wrangler secret put SECRET_KEY --name solarnotify-worker
 Starting local test environment.
 
 ```bash
+# start Cloudflare services in local
 npx wrangler dev functions
+
+# get copy of data from remote for local testing
+npx wrangler d1 export solarnotify --remote --output export.sql
+
+# edit the export.sql to drop tables
+# load local database
+npx wrangler d1 execute solarnotify --local --file export.sql
+
+# start frontend
 npm run dev
 ```

@@ -19,6 +19,10 @@ export default defineConfig({
       "/api/email/verify": {
         target: "http://localhost:8788",
         changeOrigin: true,
+      },
+      "/api/livedata/status": {
+        target: "http://localhost:8788",
+        changeOrigin: true,
       }
     }
   },
